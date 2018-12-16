@@ -42,7 +42,11 @@ namespace LifxNet
 		LightGetPower = 116,
 		LightSetPower = 117,
 		LightStatePower = 118,
-
+        //Multi-Zone Messages
+        LightSetColorZones = 501,
+        LightGetColorZones = 502,
+        LightStateZone = 503,
+        LightStateMultiZone = 506,
 
 		//Unofficial
 		LightGetTemperature = 0x6E,

@@ -37,7 +37,13 @@ namespace LifxNet
 				case MessageType.DeviceStateService:
 					response = new StateServiceResponse(payload);
 					break;
-				default:
+                case MessageType.LightStateMultiZone:
+                    response = new LightStateMultiZoneResponse(payload);
+                    break;
+                case MessageType.LightStateZone:
+                    response = new LightStateZoneResponse(payload);
+                    break;
+                default:
 					response = new UnknownResponse(payload);
 					break;
 			}
@@ -94,29 +100,17 @@ namespace LifxNet
 	{
 		internal LightStateResponse(byte[] payload) : base()
 		{
-			Hue = BitConverter.ToUInt16(payload, 0);
-			Saturation = BitConverter.ToUInt16(payload, 2);
-			Brightness = BitConverter.ToUInt16(payload, 4);
-			Kelvin = BitConverter.ToUInt16(payload, 6);
-			IsOn = BitConverter.ToUInt16(payload, 10) > 0;
+            var hsbkSize = 8;
+            var bytes = new byte[hsbkSize];
+            Array.Copy(payload, 0, bytes, 0, hsbkSize);
+            Color = new HSBK(bytes);
+            IsOn = BitConverter.ToUInt16(payload, 10) > 0;
 			Label = Encoding.UTF8.GetString(payload, 12, 32).Replace("\0","");
 		}
 		/// <summary>
-		/// Hue
+		/// Color
 		/// </summary>
-		public UInt16 Hue { get; private set; }
-		/// <summary>
-		/// Saturation (0=desaturated, 65535 = fully saturated)
-		/// </summary>
-		public UInt16 Saturation { get; private set; }
-		/// <summary>
-		/// Brightness (0=off, 65535=full brightness)
-		/// </summary>
-		public UInt16 Brightness { get; private set; }
-		/// <summary>
-		/// Bulb color temperature
-		/// </summary>
-		public UInt16 Kelvin { get; private set; }
+		public HSBK Color { get; private set; }
 		/// <summary>
 		/// Power state
 		/// </summary>
@@ -186,4 +180,102 @@ namespace LifxNet
 		internal UnknownResponse(byte[] payload) : base() {
 		}
 	}
+
+    public struct HSBK
+    {
+        public UInt16 Hue;
+        /// <summary>
+        /// Saturation (0=desaturated, 65535 = fully saturated)
+        /// </summary>
+        public UInt16 Saturation;
+        /// <summary>
+        /// Brightness (0=off, 65535=full brightness)
+        /// </summary>
+        public UInt16 Brightness;
+        /// <summary>
+        /// Bulb color temperature
+        /// </summary>
+        public UInt16 Kelvin;
+
+        internal HSBK(byte[] payload)
+        {
+            Hue = BitConverter.ToUInt16(payload, 0);
+            Saturation = BitConverter.ToUInt16(payload, 2);
+            Brightness = BitConverter.ToUInt16(payload, 4);
+            Kelvin = BitConverter.ToUInt16(payload, 6);
+        }
+
+        public HSBK(UInt16 hue, UInt16 saturation, UInt16 brightness, UInt16 kelvin)
+        {
+            Hue = hue;
+            Saturation = saturation;
+            Brightness = brightness;
+            Kelvin = kelvin;
+        }
+    }
+
+    public enum ZoneApplicationRequest: byte
+    {
+        NoApply = 0, Apply, ApplyOnly
+    }
+
+    public class LightStateMultiZoneResponse : LifxResponse
+    {
+        internal LightStateMultiZoneResponse(byte[] payload) : base()
+        {
+            var colorsCount = 8;
+            Count = payload[0];
+            Index = payload[1];
+            Colors = new HSBK[colorsCount];
+            var hsbkSize = 8;
+            for (int i = 0; i < colorsCount; i++)
+            {
+                var bytes = new byte[hsbkSize];
+                Array.Copy(payload, i * hsbkSize + 2, bytes, 0, hsbkSize);
+                Colors[i] = new HSBK(bytes);
+            }
+
+        }
+
+        public LightStateMultiZoneResponse(Byte count, HSBK[] colors)
+        {
+            Count = count;
+            Index = 0;
+            Colors = colors;
+        }
+
+        /// <summary>
+        /// Zone Count
+        /// </summary>
+        public Byte Count { get; private set; }
+        /// <summary>
+        /// Product ID
+        /// </summary>
+        public Byte Index { get; private set; }
+
+        public HSBK[] Colors { get; private set; }
+    }
+
+    public class LightStateZoneResponse : LifxResponse
+    {
+        internal LightStateZoneResponse(byte[] payload) : base()
+        {
+            Count = payload[0];
+            Index = payload[1];
+            var hsbkSize = 8;
+            var bytes = new byte[hsbkSize];
+            Array.Copy(payload, 2, bytes, 0, hsbkSize);
+            Color = new HSBK(bytes);
+        }
+        /// <summary>
+        /// Zone Count
+        /// </summary>
+        public Byte Count { get; private set; }
+        /// <summary>
+        /// Product ID
+        /// </summary>
+        public Byte Index { get; private set; }
+
+        public HSBK Color { get; private set; }
+    }
 }

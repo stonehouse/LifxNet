@@ -58,7 +58,9 @@ namespace LifxNet
                             HandleIncomingMessages(result.Buffer, result.RemoteEndPoint);
                         }
                     }
-                    catch { }
+                    catch (Exception e) {
+                        System.Diagnostics.Debug.WriteLine("Error parsing incoming message {0}", e);
+                    }
             });
         }
 
