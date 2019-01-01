@@ -233,7 +233,7 @@ namespace LifxNet
             FrameHeader header = new FrameHeader()
             {
                 Identifier = (uint)randomizer.Next(),
-                AcknowledgeRequired = true
+                AcknowledgeRequired = typeof(T) == typeof(AcknowledgementResponse)
             };
 
             var h = BitConverter.GetBytes(color.Hue);
@@ -299,7 +299,7 @@ namespace LifxNet
             FrameHeader header = new FrameHeader()
             {
                 Identifier = (uint)randomizer.Next(),
-                AcknowledgeRequired = true
+                AcknowledgeRequired = typeof(T) == typeof(AcknowledgementResponse)
             };
 
             var args = new List<byte>();
