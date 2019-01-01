@@ -48,8 +48,12 @@ namespace LifxNet
         LightStateZone = 503,
         LightStateMultiZone = 506,
 
-		//Unofficial
-		LightGetTemperature = 0x6E,
+        MultiZoneExtendedSetZones = 510,
+        MultiZoneExtendedGetZones = 511,
+        MultiZoneExtendedStateZones = 512,
+
+        //Unofficial
+        LightGetTemperature = 0x6E,
         //LightStateTemperature = 0x6f,
 		SetLightBrightness = 0x68
 	}

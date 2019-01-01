@@ -91,22 +91,53 @@ namespace LifxNet
 			return SetColorAsync(bulb, hsl[0], hsl[1], hsl[2], kelvin, transitionDuration);
 		}
 
-		/// <summary>
-		/// Sets color and temperature for a bulb and uses a transition time to the provided state
-		/// </summary>
-		/// <param name="bulb">Light bulb</param>
-		/// <param name="hue">0..65535</param>
-		/// <param name="saturation">0..65535</param>
-		/// <param name="brightness">0..65535</param>
-		/// <param name="kelvin">2700..9000</param>
-		/// <param name="transitionDuration"></param>
-		/// <returns></returns>
-		public async Task SetColorAsync(LightBulb bulb,
+        /// <summary>
+        /// Sets color and temperature for a bulb and uses a transition time to the provided state
+        /// </summary>
+        /// <param name="bulb">Light bulb</param>
+        /// <param name="hue">0..65535</param>
+        /// <param name="saturation">0..65535</param>
+        /// <param name="brightness">0..65535</param>
+        /// <param name="kelvin">2700..9000</param>
+        /// <param name="transitionDuration"></param>
+        /// <returns></returns>
+        public async Task SetColorAsync(LightBulb bulb,
+            UInt16 hue,
+            UInt16 saturation,
+            UInt16 brightness,
+            UInt16 kelvin,
+            TimeSpan transitionDuration)
+        {
+            await SetColorAsync<AcknowledgementResponse>(bulb, hue, saturation, brightness, kelvin, transitionDuration);
+        }
+
+        public void SetColor(LightBulb bulb, Color color, UInt16 kelvin)
+        {
+            SetColor(bulb, color, kelvin, TimeSpan.Zero);
+        }
+
+        public void SetColor(LightBulb bulb, Color color, UInt16 kelvin, TimeSpan transitionDuration)
+        {
+            var hsl = Utilities.RgbToHsl(color);
+            SetColorAsync<UnknownResponse>(bulb, hsl[0], hsl[1], hsl[2], kelvin, transitionDuration).ContinueWith((fin) => { });
+        }
+        
+        public void SetColor(LightBulb bulb,
+            UInt16 hue,
+            UInt16 saturation,
+            UInt16 brightness,
+            UInt16 kelvin,
+            TimeSpan transitionDuration)
+        {
+            SetColorAsync<UnknownResponse>(bulb, hue, saturation, brightness, kelvin, transitionDuration).ContinueWith((fin) => { });
+        }
+
+        private async Task<T> SetColorAsync<T>(LightBulb bulb,
 			UInt16 hue,
 			UInt16 saturation,
 			UInt16 brightness,
 			UInt16 kelvin,
-			TimeSpan transitionDuration)
+			TimeSpan transitionDuration) where T: LifxResponse
 		{
 			if (transitionDuration.TotalMilliseconds > UInt32.MaxValue ||
 				transitionDuration.Ticks < 0)
@@ -129,7 +160,7 @@ namespace LifxNet
 			var b = BitConverter.GetBytes(brightness);
 			var k = BitConverter.GetBytes(kelvin);
 
-			await BroadcastMessageAsync<AcknowledgementResponse>(bulb.HostName, header,
+		    return await BroadcastMessageAsync<T>(bulb.HostName, header,
 				MessageType.LightSetColor, (byte)0x00, //reserved
 					hue, saturation, brightness, kelvin, //HSBK
 					duration
@@ -183,10 +214,21 @@ namespace LifxNet
         public async Task SetColorZonesAsync(LightBulb bulb, byte startIndex, byte endIndex, Color color, UInt16 kelvin, UInt32 duration, ZoneApplicationRequest apply)
         {
             var hsl = Utilities.RgbToHsl(color);
-            await SetColorZonesAsync(bulb, startIndex, endIndex, new HSBK(hsl[0], hsl[1], hsl[2], kelvin), duration, apply);
+            await SetColorZonesAsync<AcknowledgementResponse>(bulb, startIndex, endIndex, new HSBK(hsl[0], hsl[1], hsl[2], kelvin), duration, apply);
         }
 
-        public async Task SetColorZonesAsync(LightBulb bulb, byte startIndex, byte endIndex, HSBK color, UInt32 duration, ZoneApplicationRequest apply)
+        public void SetColorZones(LightBulb bulb, byte index, Color color, UInt16 kelvin, UInt32 duration, ZoneApplicationRequest apply)
+        {
+            SetColorZones(bulb, index, index, color, kelvin, duration, apply);
+        }
+
+        public void SetColorZones(LightBulb bulb, byte startIndex, byte endIndex, Color color, UInt16 kelvin, UInt32 duration, ZoneApplicationRequest apply)
+        {
+            var hsl = Utilities.RgbToHsl(color);
+            SetColorZonesAsync<UnknownResponse>(bulb, startIndex, endIndex, new HSBK(hsl[0], hsl[1], hsl[2], kelvin), duration, apply).ContinueWith((fin) => { });
+        }
+
+        private async Task<T> SetColorZonesAsync<T>(LightBulb bulb, byte startIndex, byte endIndex, HSBK color, UInt32 duration, ZoneApplicationRequest apply) where T: LifxResponse
         {
             FrameHeader header = new FrameHeader()
             {
@@ -200,7 +242,7 @@ namespace LifxNet
             var k = BitConverter.GetBytes(color.Kelvin);
             var d = BitConverter.GetBytes(duration);
 
-            await BroadcastMessageAsync<AcknowledgementResponse>(
+            return await BroadcastMessageAsync<T>(
                 bulb.HostName, header, MessageType.LightSetColorZones, startIndex, endIndex, h, s, b, k, d, (byte)apply);
         }
 
@@ -232,6 +274,62 @@ namespace LifxNet
             }
 
             return new LightStateMultiZoneResponse(zonesCount, colors.ToArray());
+        }
+
+        public void SetColorZones(LightBulb bulb, Color[] colors, UInt16 kelvin, UInt32 duration = 0)
+        {
+            var hsbks = new List<HSBK>();
+            foreach (var color in colors)
+            {
+                var hsl = Utilities.RgbToHsl(color);
+                var hsbk = new HSBK(hsl[0], hsl[1], hsl[2], kelvin);
+                hsbks.Add(hsbk);
+            }
+
+            SetColorZones(bulb, hsbks.ToArray(), duration);
+        }
+
+        public void SetColorZones(LightBulb bulb, HSBK[] colors, UInt32 duration)
+        {
+            SetColorZonesAsync<UnknownResponse>(bulb, colors, duration).ContinueWith((fin) => { });
+        }
+
+        private async Task<T> SetColorZonesAsync<T>(LightBulb bulb, HSBK[] colors, UInt32 duration) where T : LifxResponse
+        {
+            FrameHeader header = new FrameHeader()
+            {
+                Identifier = (uint)randomizer.Next(),
+                AcknowledgeRequired = true
+            };
+
+            var args = new List<byte>();
+
+            var d = BitConverter.GetBytes(duration);
+            args.AddRange(d);
+
+            var apply = ZoneApplicationRequest.Apply;
+            args.Add((byte)apply);
+
+            UInt16 index = 0;
+            args.AddRange(BitConverter.GetBytes(index));
+
+            args.Add((byte)colors.Length);
+
+            foreach (var color in colors)
+            {
+                var h = BitConverter.GetBytes(color.Hue);
+                var s = BitConverter.GetBytes(color.Saturation);
+                var b = BitConverter.GetBytes(color.Brightness);
+                var k = BitConverter.GetBytes(color.Kelvin);
+                
+                args.AddRange(h);
+                args.AddRange(s);
+                args.AddRange(b);
+                args.AddRange(k);
+            }
+
+            return await BroadcastMessageAsync<T>(
+                bulb.HostName, header, MessageType.MultiZoneExtendedSetZones, args.ToArray());
         }
     }
 }
