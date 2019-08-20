@@ -170,7 +170,7 @@ namespace LifxNet
 			{
 				var _ = Task.Delay(1000).ContinueWith((t) =>
 				{
-					if (!t.IsCompleted)
+					if (!tcs.Task.IsCompleted)
 						tcs.TrySetException(new TimeoutException());
 				});
 				try {
