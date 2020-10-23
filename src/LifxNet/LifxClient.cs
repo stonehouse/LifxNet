@@ -126,20 +126,12 @@ namespace LifxNet
 		private async Task<T> BroadcastMessagePayloadAsync<T>(string hostName, FrameHeader header, MessageType type, byte[] payload)
 			where T : LifxResponse
 		{
-#if DEBUG
-			/// MemoryStream ms = new MemoryStream();
-			/// await WritePacketToStreamAsync(ms.AsOutputStream(), header, (UInt16)type, payload).ConfigureAwait(false);
-			/// var data = ms.ToArray();
-			/// System.Diagnostics.Debug.WriteLine(
-			/// 	string.Join(",", (from a in data select a.ToString("X2")).ToArray()));
-#endif
 			if (hostName == null)
 			{
 				hostName = "255.255.255.255";
 			}
 			TaskCompletionSource<T> tcs = null;
-            if (//header.AcknowledgeRequired && 
-				header.Identifier > 0 && 
+            if (header.Identifier > 0 && 
 				typeof(T) != typeof(UnknownResponse))
 			{
 				tcs = new TaskCompletionSource<T>();
@@ -164,9 +156,7 @@ namespace LifxNet
                 var msg = stream.ToArray();
                 await _socket.SendAsync(msg, msg.Length, hostName, Port);
             }
-			//{
-			//	await WritePacketToStreamAsync(stream, header, (UInt16)type, payload).ConfigureAwait(false);
-			//}
+
 			T result = default(T);
 			if(tcs != null)
 			{
@@ -220,7 +210,6 @@ namespace LifxNet
 		{
 			using (var dw = new BinaryWriter(outStream) { /*ByteOrder = ByteOrder.LittleEndian*/ })
 			{
-				//BinaryWriter bw = new BinaryWriter(ms);
 				#region Frame
 				//size uint16
 				dw.Write((UInt16)((payload != null ? payload.Length : 0) + 36)); //length

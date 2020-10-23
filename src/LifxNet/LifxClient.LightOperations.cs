@@ -167,29 +167,6 @@ namespace LifxNet
 			);
 		}
 
-		/*
-		public async Task SetBrightnessAsync(LightBulb bulb,
-			UInt16 brightness,
-			TimeSpan transitionDuration)
-		{
-			if (transitionDuration.TotalMilliseconds > UInt32.MaxValue ||
-				transitionDuration.Ticks < 0)
-				throw new ArgumentOutOfRangeException("transitionDuration");
-
-			FrameHeader header = new FrameHeader()
-			{
-				Identifier = (uint)randomizer.Next(),
-				AcknowledgeRequired = true
-			};
-			UInt32 duration = (UInt32)transitionDuration.TotalMilliseconds;
-			var durationBytes = BitConverter.GetBytes(duration);
-			var b = BitConverter.GetBytes(brightness);
-
-			await BroadcastMessageAsync<AcknowledgementResponse>(bulb.HostName, header,
-				MessageType.SetLightBrightness, brightness, duration
-			);
-		}*/
-
 			/// <summary>
 			/// Gets the current state of the bulb
 			/// </summary>

@@ -38,6 +38,7 @@
     <DocumentationFile>bin\Release\LifxNet.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="LifxClient.Resolve.cs" />
     <Compile Include="Color.cs" />
     <Compile Include="LifxClient.cs" />
     <Compile Include="LifxClient.LightOperations.cs" />
