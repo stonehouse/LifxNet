@@ -1,0 +1,3 @@
+[submodule "src/LifxNet/Libs/products"]
+	path = src/LifxNet/Libs/products
+	url = git@github.com:LIFX/products.git

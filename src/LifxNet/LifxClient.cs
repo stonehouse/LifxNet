@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
+using LifxNet.Producs;
 
 namespace LifxNet
 {
@@ -18,6 +19,7 @@ namespace LifxNet
 		private const int Port = 56700;
 		private UdpClient _socket;
         private bool _isRunning;
+		LifxVendor[] vendors;
 
 		private LifxClient()
 		{
@@ -36,6 +38,8 @@ namespace LifxNet
 
         private void Initialize()
 		{
+			// Load product manifest
+			vendors = LifxVendor.Load();
             IPEndPoint end = new IPEndPoint(IPAddress.Any, Port);
 			_socket = new UdpClient(end);
             _socket.Client.Blocking = false;
