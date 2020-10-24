@@ -33,6 +33,16 @@ namespace LifxNet
             }
 
             var light = new LightInfo(bulb, state, firmware, product);
+
+            if (light.SupportsExtendedMultiZone)
+            {
+                var zones = await GetExtendedColorZonesAsync(bulb);
+                light.Zones = zones.Colors;
+            } else if (light.SupportsMultiZone)
+            {
+                var zones = await GetColorZonesAsync(bulb);
+                light.Zones = zones.Colors;
+            }
             return light;
         }
 
@@ -46,7 +56,8 @@ namespace LifxNet
         {
             public string Label { get; }
             public LightBulb Info { get; }
-            public HSBK InitialColor { get; }
+            public HSBK Color { internal set; get; }
+            public HSBK[] Zones { internal set; get; }
             public bool On { get; }
             public FirmwareVersion FirmwareVersion { get; }
 
@@ -64,7 +75,7 @@ namespace LifxNet
                 this.Info = light;
                 this.Label = state.Label;
                 this.On = state.IsOn;
-                this.InitialColor = state.Color;
+                this.Color = state.Color;
 
                 var firmwareBytes = BitConverter.GetBytes(firmware.Version);
                 this.FirmwareVersion = new FirmwareVersion

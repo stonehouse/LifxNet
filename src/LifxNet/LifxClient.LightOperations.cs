@@ -223,7 +223,7 @@ namespace LifxNet
                 bulb.HostName, header, MessageType.LightSetColorZones, startIndex, endIndex, h, s, b, k, d, (byte)apply);
         }
 
-        public Task<LightStateMultiZoneResponse> GetColorZonesAsync(LightBulb bulb, byte startIndex, byte endIndex)
+        private Task<LightStateMultiZoneResponse> GetColorZonesAsync(LightBulb bulb, byte startIndex, byte endIndex)
         {
             FrameHeader header = new FrameHeader()
             {
@@ -253,7 +253,7 @@ namespace LifxNet
             return new LightStateMultiZoneResponse(zonesCount, colors.ToArray());
         }
 
-        public void SetColorZones(LightBulb bulb, Color[] colors, UInt16 kelvin, UInt32 duration = 0)
+        public void SetExtendedColorZonesAsync(LightBulb bulb, Color[] colors, UInt16 kelvin, UInt32 duration = 0)
         {
             var hsbks = new List<HSBK>();
             foreach (var color in colors)
@@ -263,15 +263,15 @@ namespace LifxNet
                 hsbks.Add(hsbk);
             }
 
-            SetColorZones(bulb, hsbks.ToArray(), duration);
+            SetExtendedColorZonesAsync(bulb, hsbks.ToArray(), duration);
         }
 
-        public void SetColorZones(LightBulb bulb, HSBK[] colors, UInt32 duration)
+        public void SetExtendedColorZonesAsync(LightBulb bulb, HSBK[] colors, UInt32 duration)
         {
-            SetColorZonesAsync<UnknownResponse>(bulb, colors, duration).ContinueWith((fin) => { });
+            SetExtendedColorZonesAsync<UnknownResponse>(bulb, colors, duration).ContinueWith((fin) => { });
         }
 
-        private async Task<T> SetColorZonesAsync<T>(LightBulb bulb, HSBK[] colors, UInt32 duration) where T : LifxResponse
+        private async Task<T> SetExtendedColorZonesAsync<T>(LightBulb bulb, HSBK[] colors, UInt32 duration) where T : LifxResponse
         {
             FrameHeader header = new FrameHeader()
             {
@@ -307,6 +307,18 @@ namespace LifxNet
 
             return await BroadcastMessageAsync<T>(
                 bulb.HostName, header, MessageType.MultiZoneExtendedSetZones, args.ToArray());
+        }
+
+        public Task<LightStateExtendedMultiZoneResponse> GetExtendedColorZonesAsync(LightBulb bulb)
+        {
+            FrameHeader header = new FrameHeader()
+            {
+                Identifier = (uint)randomizer.Next(),
+                AcknowledgeRequired = false
+            };
+
+            return BroadcastMessageAsync<LightStateExtendedMultiZoneResponse>(
+                bulb.HostName, header, MessageType.MultiZoneExtendedGetZones, new object[0]);
         }
     }
 }

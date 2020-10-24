@@ -43,6 +43,9 @@ namespace LifxNet
                 case MessageType.LightStateZone:
                     response = new LightStateZoneResponse(payload);
                     break;
+				case MessageType.MultiZoneExtendedStateZones:
+					response = new LightStateExtendedMultiZoneResponse(payload);
+					break;
                 default:
 					response = new UnknownResponse(payload);
 					break;
@@ -183,6 +186,7 @@ namespace LifxNet
 
     public struct HSBK
     {
+		internal static int size = 8;
         public UInt16 Hue;
         /// <summary>
         /// Saturation (0=desaturated, 65535 = fully saturated)
@@ -248,9 +252,6 @@ namespace LifxNet
         /// Zone Count
         /// </summary>
         public Byte Count { get; private set; }
-        /// <summary>
-        /// Product ID
-        /// </summary>
         public Byte Index { get; private set; }
 
         public HSBK[] Colors { get; private set; }
@@ -271,11 +272,40 @@ namespace LifxNet
         /// Zone Count
         /// </summary>
         public Byte Count { get; private set; }
-        /// <summary>
-        /// Product ID
-        /// </summary>
         public Byte Index { get; private set; }
 
         public HSBK Color { get; private set; }
     }
+
+	public class LightStateExtendedMultiZoneResponse : LifxResponse
+	{
+		internal LightStateExtendedMultiZoneResponse(byte[] payload) : base()
+		{
+			Count = BitConverter.ToUInt16(payload, 0);
+			Index = BitConverter.ToUInt16(payload, 2);
+			var colorsCount = BitConverter.ToUInt16(payload, 4);
+			Colors = new HSBK[colorsCount];
+			for (int i = 0; i < colorsCount; i++)
+			{
+				var bytes = new byte[HSBK.size];
+				Array.Copy(payload, i * HSBK.size + 2, bytes, 0, HSBK.size);
+				Colors[i] = new HSBK(bytes);
+			}
+
+		}
+
+		public LightStateExtendedMultiZoneResponse(Byte count, HSBK[] colors)
+		{
+			Count = count;
+			Index = 0;
+			Colors = colors;
+		}
+
+		/// <summary>
+		/// Zone Count
+		/// </summary>
+		public UInt16 Count { get; private set; }
+		public UInt16 Index { get; private set; }
+		public HSBK[] Colors { get; private set; }
+	}
 }
