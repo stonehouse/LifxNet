@@ -47,6 +47,7 @@
     <Compile Include="LifxClient\LifxClient.Discovery.cs" />
     <Compile Include="LifxClient\LifxClient.DeviceOperations.cs" />
     <Compile Include="LifxClient\LifxClient.Resolve.cs" />
+    <Compile Include="LifxClient\LightOperations\LifxClient.LightInfoOperations.cs" />
     <Compile Include="LifxPacket.cs" />
     <Compile Include="LifxResponses.cs" />
     <Compile Include="LifxClient\LightOperations\LifxClient.ExtendedMultiZoneOperations.cs" />
