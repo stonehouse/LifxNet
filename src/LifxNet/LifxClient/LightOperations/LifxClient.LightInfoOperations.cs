@@ -54,14 +54,14 @@ namespace LifxNet
             var zonesPerColor = zonesCount / colors.Length;
             var zoneColors = new Color[zonesCount];
             var startIndex = 0;
-            var endIndex = zonesPerColor;
+            var endIndex = zonesPerColor - 1;
 
             var colorList = colors.ToList();
             Color? color = colorList[0];
             colorList.RemoveAt(0);
             for (var i = 0; i < colors.Length; i++)
             {
-                SetColorZones(light, Convert.ToByte(startIndex), Convert.ToByte(endIndex), colors[i], Convert.ToByte(kelvin), 0, ZoneApplicationRequest.Apply);
+                SetColorZones(light, Convert.ToByte(startIndex), Convert.ToByte(endIndex), colors[i], Convert.ToUInt16(kelvin), 0, ZoneApplicationRequest.Apply);
 
                 startIndex = endIndex + 1;
                 endIndex += zonesPerColor;
@@ -69,7 +69,7 @@ namespace LifxNet
                 {
                     endIndex = zonesCount - 1;
                 }
-                else if (endIndex + zonesCount > (zonesCount - 1))
+                else if (endIndex + zonesPerColor > (zonesCount - 1))
                 {
                     endIndex = zonesCount - 1;
                 }
