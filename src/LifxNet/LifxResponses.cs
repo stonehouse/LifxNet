@@ -283,12 +283,12 @@ namespace LifxNet
 		{
 			Count = BitConverter.ToUInt16(payload, 0);
 			Index = BitConverter.ToUInt16(payload, 2);
-			var colorsCount = BitConverter.ToUInt16(payload, 4);
+			var colorsCount = payload[4];
 			Colors = new HSBK[colorsCount];
 			for (int i = 0; i < colorsCount; i++)
 			{
 				var bytes = new byte[HSBK.size];
-				Array.Copy(payload, i * HSBK.size + 2, bytes, 0, HSBK.size);
+				Array.Copy(payload, i * HSBK.size + 3, bytes, 0, HSBK.size);
 				Colors[i] = new HSBK(bytes);
 			}
 

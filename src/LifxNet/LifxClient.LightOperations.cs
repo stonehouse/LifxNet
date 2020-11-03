@@ -253,7 +253,7 @@ namespace LifxNet
             return new LightStateMultiZoneResponse(zonesCount, colors.ToArray());
         }
 
-        public void SetExtendedColorZonesAsync(LightBulb bulb, Color[] colors, UInt16 kelvin, UInt32 duration = 0)
+        public void SetExtendedColorZonesAsync(LightBulb bulb, Color[] colors, UInt16 kelvin, UInt32 duration)
         {
             var hsbks = new List<HSBK>();
             foreach (var color in colors)
