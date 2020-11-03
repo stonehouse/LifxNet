@@ -42,12 +42,15 @@
   <ItemGroup>
     <Compile Include="Color.cs" />
     <Compile Include="LifxClient.cs" />
-    <Compile Include="LifxClient.LightOperations.cs" />
+    <Compile Include="LightOperations\LifxClient.ColorOperations.cs" />
     <Compile Include="LifxClient.Discovery.cs" />
     <Compile Include="LifxClient.DeviceOperations.cs" />
     <Compile Include="LifxClient.Resolve.cs" />
     <Compile Include="LifxPacket.cs" />
     <Compile Include="LifxResponses.cs" />
+    <Compile Include="LightOperations\LifxClient.ExtendedMultiZoneOperations.cs" />
+    <Compile Include="LightOperations\LifxClient.MultiZoneOperations.cs" />
+    <Compile Include="LightOperations\LifxClient.PowerOperations.cs" />
     <Compile Include="MessageType.cs" />
     <Compile Include="Producs\LifxProducts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

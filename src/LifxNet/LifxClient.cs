@@ -20,6 +20,7 @@ namespace LifxNet
 		private UdpClient _socket;
         private bool _isRunning;
 		LifxVendor[] vendors;
+		private Dictionary<UInt32, Action<LifxResponse>> taskCompletions = new Dictionary<uint, Action<LifxResponse>>();
 
 		private LifxClient()
 		{

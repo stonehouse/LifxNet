@@ -10,7 +10,7 @@ namespace LifxNet
 {
 	public partial class LifxClient : IDisposable
 	{
-		private static Random randomizer = new Random();
+		Random randomizer = new Random();
 		private UInt32 discoverSourceID;
 		private CancellationTokenSource _DiscoverCancellationSource;
 		private Dictionary<string, Device> DiscoveredBulbs = new Dictionary<string, Device>();
